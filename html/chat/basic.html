@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>房间选择页面</title>
+</head>
+<body style="background: antiquewhite;">
+<form>
+    <h1>你好 ！{{ session }} <br> 欢迎来到聊天室！</h1>
+    <input type="hidden" value="{{ set1 }}" id="set1" name="set1">
+    <h1>现在存在{{ set1 }}聊天室</h1>
+    <h1>and you can create a chat room</h1>
+</form>
+
+<form method="post" action="/create">
+    <div class="main" id="main">
+        <h1>please input the name of the chatroom</h1>
+        <input type="text" name="roomname" id="roomname">
+        <input type="hidden" value="{{ session }}" id="session" name="session">
+        <!--input type="button" onclick="inputname()" value="create"-->
+        <br>
+        <input type="submit" value="yes">
+        <br>
+    </div>
+</form>
+
+
+
+    <script>
+        var number=2;
+        function inputname() {
+            //var x;
+	        //var chat_name = prompt("请输入聊天室名称","聊天室三");
+	        var chat_name = document.getElementById("roomname").value;
+	        if (chat_name!=null && chat_name!=""){
+	            //x="你好 ,已创建聊天室" + chat_name ;
+	            //document.getElementById("demo").innerHTML=x;
+	            var a=document.createElement("a");
+	            var b=document.createElement("br");
+                number=number+1;
+                a.href= "/home/?n=" + number + "&u={{ session }}";
+                a.innerText = chat_name;
+                //$('#increase').appendChild(a);
+                //$('#increase').appendChild(b);
+	            document.body.appendChild(a);
+	            document.body.appendChild(b);
+	        }
+        }
+        window.onload=function() {
+            var set1= document.getElementById("set1").value;
+            //alert(set1);
+            //var myset = new Array();
+            var myset = set1.split(",");
+            alert(myset)
+            for (var i = 2; i < myset.length; i++) {
+                var a = document.createElement("a");
+                var b = document.createElement("br");
+                a.href = "/home/?n=" + (i+1) + "&u={{ session }}";
+                a.innerText = myset[i].slice(1,-1);
+                document.body.appendChild(a);
+                document.body.appendChild(b);
+            }
+        }
+
+    </script>
+
+<a href="/home/?n=1&u={{ session }}"> 聊天室一 </a> <br>
+<a href="/home/?n=2&u={{ session }}"> 聊天室二 </a> <br>
+</body>
+</html>

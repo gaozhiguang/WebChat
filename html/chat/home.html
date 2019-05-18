@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>聊天页面</title>
+    <script src="http://libs.baidu.com/jquery/1.10.2/jquery.min.js"></script>
+    <script>
+        $(function(){
+                n = $("#n").val()
+                u = $("#u").val()
+                historyname = n+u
+                $("#btn").click(function(){
+                    sendText()
+                    localStorage.setItem(historyname,document.getElementById("chatinfo").innerHTML)//保存历史记录
+                })
+                function requestText(){
+                    host = "ws://localhost:8000/newChatStatus/?n=" + n + "&u=" +u
+                    websocket = new WebSocket(host)
+
+                    websocket.onopen = function(evt){
+                        $('#chathistory').append(localStorage.getItem(historyname))
+                    }      // 建立连接
+                    websocket.onmessage = function(evt){    // 获取服务器返回的信息
+                        data = $.parseJSON(evt.data)
+                        if(data['from']=='sys'){  // 如果是系统信息，则显示在中间
+                            $('#chatinfo').append("<p style='width: 100%; text-align:center; " +
+                                "font-size: 16px; color: green'>" + data['message'] +data['time']+ "</p>");
+                        }else if(data['from']==u){ //如果是本人发送的信息，则显示在右边
+                            $('#chatinfo').append("<p style='width: 100%; text-align:right; " +
+                                "font-size:15px'>" + u + ": <br>" +"<span style='color: blue'>" + data['message'] + "</span>" + "</p>");
+                        }else{   //如果是聊天对象的信息，显示在左边
+                            $('#chatinfo').append("<p style='width: 100%; text-align:left; font-size:15px'>"+ data['time'] + data['from'] + ": <br>" +"<span style='color: red'>" + data['message'] + "</span>" + "</p>");
+                        }
+                        localStorage.setItem(historyname,document.getElementById("chatinfo").innerHTML)//保存历史记录
+                    }
+                    websocket.onerror = function(evt){}
+                }
+
+                requestText()   // 开始 websocket连接，并开始接收信息
+
+                function sendText(){    // 向服务器发送信息
+                    websocket.send($("#chat_text").val())
+                }
+                $("#clean").click(function(){
+                    $('#chathistory').empty();//清空文本
+                    localStorage.setItem(historyname,"")//清空历史记录
+                })
+            }
+        )
+//可使用<meta http-equiv="refresh" content="3">刷新网页解决无法自动显示聊天记录的为问题。。但是这个东西把历史记录也刷新掉了
+    </script>
+</head>
+<body>
+<div align="center">
+    <form method="post" action="/tuichu">
+    <div style="width: 70% ;background: aquamarine">
+        <h1>聊天室（{{ n }}）!</h1>
+        <input type="hidden" value="{{ n }}" id="n" name="n">
+        <input type="hidden" value="{{ u }}" id="u" name="u">
+    <input type="submit" value="退出此聊天室">
+    </div>
+    </form>
+    <div style="width: 70% ;background: aquamarine">
+        <div id="chatinfo" style="padding:10px;border: 1px solid #888">
+            <!-- 聊天内容，将聊天内容显示在此，通过append方法 -->
+        </div>
+
+        <div style="clear: both; text-align:right; margin-top: 20px">
+            <input type="text" name="chat_text" id="chat_text">
+            <button id="btn" style="width: border-box;border: #00FF00;background: brown">发送</button>
+        </div>
+    </div>
+</div>
+ <div align="center">
+    <div style="width: 40%">
+        <h1>聊天室（{{ n }}）</h1>
+        <input type="hidden" value="{{ n }}" id="n">
+        <input type="hidden" value="{{ u }}" id="u">
+
+        <div id="chathistory" style="padding:20px;border: 1px solid #888">
+            <button id="clean">清空聊天记录</button>
+            <!-- 历史聊天内容 -->
+            <p>聊天记录</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
